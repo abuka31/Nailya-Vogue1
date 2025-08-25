@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nailya-Vogue - Интернет-магазин одежды</title>
+    <title>Наилья Вогуи - Интернет-магазин одежды</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -55,7 +55,7 @@
             <div class="flex items-center justify-between h-16">
                 <!-- Логотип -->
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-purple-600">Nailya-Vogue</h1>
+                    <h1 class="text-2xl font-bold text-purple-600">Наилья Вогуи</h1>
                 </div>
                 
                 <!-- Поиск -->
@@ -279,12 +279,12 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
-                    <h3 class="text-xl font-bold mb-4">Nailya-Vogue</h3>
+                    <h3 class="text-xl font-bold mb-4">Наилья Вогуи</h3>
                     <p class="text-gray-300">Стильная одежда для современных женщин</p>
                 </div>
                 <div>
                     <h4 class="font-semibold mb-4" data-translate="contacts">Контакты</h4>
-                    <p class="text-gray-300 mb-2">+996 505 191 993</p>
+                    <p class="text-gray-300 mb-2">+996 555 123 456</p>
                     <p class="text-gray-300 mb-2">info@nailyavogue.kg</p>
                 </div>
                 <div>
@@ -294,7 +294,7 @@
                 </div>
                 <div>
                     <h4 class="font-semibold mb-4" data-translate="address">Адрес</h4>
-                    <p class="text-gray-300">г. Бишкек, ул. Ахунбаева 166 </p>
+                    <p class="text-gray-300">г. Бишкек, ул. Чуй 123</p>
                     <p class="text-gray-300">Торговый центр "Центр"</p>
                 </div>
             </div>
@@ -766,8 +766,8 @@
     </div>
 
     <script>
-        // Данные
-        let products = [
+        // Данные с автосохранением в localStorage
+        const defaultProducts = [
             {
                 id: 1, 
                 name: 'Летнее платье', 
@@ -890,8 +890,76 @@
             }
         ];
 
-        let cart = [];
-        let favorites = [];
+        // Функции для работы с localStorage
+        function saveProductsToStorage() {
+            try {
+                localStorage.setItem('nailya_vogue_products', JSON.stringify(products));
+                console.log('Товары сохранены в localStorage');
+            } catch (error) {
+                console.error('Ошибка сохранения товаров:', error);
+            }
+        }
+
+        function loadProductsFromStorage() {
+            try {
+                const savedProducts = localStorage.getItem('nailya_vogue_products');
+                if (savedProducts) {
+                    const parsedProducts = JSON.parse(savedProducts);
+                    // Проверяем, что данные корректные
+                    if (Array.isArray(parsedProducts) && parsedProducts.length > 0) {
+                        return parsedProducts;
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки товаров:', error);
+            }
+            return defaultProducts; // Возвращаем дефолтные товары если что-то пошло не так
+        }
+
+        function saveCartToStorage() {
+            try {
+                localStorage.setItem('nailya_vogue_cart', JSON.stringify(cart));
+            } catch (error) {
+                console.error('Ошибка сохранения корзины:', error);
+            }
+        }
+
+        function loadCartFromStorage() {
+            try {
+                const savedCart = localStorage.getItem('nailya_vogue_cart');
+                if (savedCart) {
+                    return JSON.parse(savedCart);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки корзины:', error);
+            }
+            return [];
+        }
+
+        function saveFavoritesToStorage() {
+            try {
+                localStorage.setItem('nailya_vogue_favorites', JSON.stringify(favorites));
+            } catch (error) {
+                console.error('Ошибка сохранения избранного:', error);
+            }
+        }
+
+        function loadFavoritesFromStorage() {
+            try {
+                const savedFavorites = localStorage.getItem('nailya_vogue_favorites');
+                if (savedFavorites) {
+                    return JSON.parse(savedFavorites);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки избранного:', error);
+            }
+            return [];
+        }
+
+        // Инициализация данных
+        let products = loadProductsFromStorage();
+        let cart = loadCartFromStorage();
+        let favorites = loadFavoritesFromStorage();
         let currentFilter = '';
         let currentLanguage = 'ru';
         let selectedProduct = null;
@@ -1187,6 +1255,7 @@
             }
             
             updateCartDisplay();
+            saveCartToStorage();
             showNotification('Товар добавлен в корзину!');
             closeProductModal();
         }
@@ -1205,6 +1274,7 @@
             }
             
             document.getElementById('favorites-count').textContent = favorites.length;
+            saveFavoritesToStorage();
             renderFavorites();
         }
 
@@ -1272,12 +1342,14 @@
             }
             
             updateCartDisplay();
+            saveCartToStorage();
             showNotification('Товар добавлен в корзину!');
         }
 
         function removeFromCart(productId) {
             cart = cart.filter(item => item.id !== productId);
             updateCartDisplay();
+            saveCartToStorage();
             renderCartItems();
         }
 
@@ -1289,6 +1361,7 @@
                     removeFromCart(productId);
                 } else {
                     updateCartDisplay();
+                    saveCartToStorage();
                     renderCartItems();
                 }
             }
@@ -1322,6 +1395,8 @@
                         <div>
                             <h4 class="font-semibold">${item.name}</h4>
                             <p class="text-gray-600">${item.price} сом</p>
+                            ${item.selectedColor ? `<p class="text-xs text-gray-500">Цвет: ${item.selectedColor}</p>` : ''}
+                            ${item.selectedSize ? `<p class="text-xs text-gray-500">Размер: ${item.selectedSize}</p>` : ''}
                         </div>
                     </div>
                     <div class="flex items-center space-x-2">
@@ -1347,6 +1422,7 @@
             }
             
             document.getElementById('favorites-count').textContent = favorites.length;
+            saveFavoritesToStorage();
             renderFavorites();
         }
 
@@ -1432,6 +1508,7 @@
             showNotification('Заказ оформлен! Мы свяжемся с вами в ближайшее время.');
             cart = [];
             updateCartDisplay();
+            saveCartToStorage();
             hideCheckout();
         }
 
@@ -1660,8 +1737,9 @@
             };
             
             products.push(newProduct);
+            saveProductsToStorage(); // Сохраняем в localStorage
             renderProducts();
-            showNotification('Товар успешно добавлен!');
+            showNotification('Товар успешно добавлен и сохранен!');
             
             // Очистить форму
             clearAddForm();
@@ -1903,11 +1981,14 @@
                 currentEditingProduct.image = currentEditingProduct.images[0];
             }
             
+            // Сохраняем в localStorage
+            saveProductsToStorage();
+            
             // Обновляем отображение
             renderProducts();
             renderAdminProductsList();
             closeEditModal();
-            showNotification('Товар успешно обновлен!');
+            showNotification('Товар успешно обновлен и сохранен!');
         }
 
         function closeEditModal() {
@@ -1918,9 +1999,10 @@
         function deleteProduct(productId) {
             if (confirm('Вы уверены, что хотите удалить этот товар?')) {
                 products = products.filter(p => p.id !== productId);
+                saveProductsToStorage(); // Сохраняем изменения
                 renderProducts();
                 renderAdminProductsList();
-                showNotification('Товар удален');
+                showNotification('Товар удален и изменения сохранены');
             }
         }
 
@@ -1944,5 +2026,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9749bfdf805d4ede',t:'MTc1NjExMDg1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9749e4ab8573bf45',t:'MTc1NjExMjM2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
